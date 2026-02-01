@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -51,7 +50,6 @@ export default function SettingsPage() {
   const [crawlerForm, setCrawlerForm] = useState<CrawlerSettings | null>(null);
   const [proxyForm, setProxyForm] = useState<ProxySettings | null>(null);
 
-  // Initialize forms when data loads
   if (settings && !crawlerForm) {
     setCrawlerForm(settings.crawler);
   }
@@ -175,17 +173,17 @@ export default function SettingsPage() {
 
           {/* Crawler Settings */}
           <TabsContent value="crawler">
-            <Card>
-              <CardHeader>
-                <CardTitle>爬虫配置</CardTitle>
-                <CardDescription>设置爬虫行为参数</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
+            <div className="bg-card rounded-lg border shadow-soft">
+              <div className="p-6 border-b border-border">
+                <h3 className="text-lg font-semibold">爬虫配置</h3>
+                <p className="text-sm text-muted-foreground">设置爬虫行为参数</p>
+              </div>
+              <div className="p-6 space-y-6">
                 {crawlerForm && (
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <Label>请求间隔（秒）</Label>
+                        <Label className="text-xs font-medium">请求间隔（秒）</Label>
                         <Input
                           type="number"
                           step="0.1"
@@ -204,7 +202,7 @@ export default function SettingsPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label>页面超时（毫秒）</Label>
+                        <Label className="text-xs font-medium">页面超时（毫秒）</Label>
                         <Input
                           type="number"
                           step="1000"
@@ -223,7 +221,7 @@ export default function SettingsPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label>最大重试次数</Label>
+                        <Label className="text-xs font-medium">最大重试次数</Label>
                         <Input
                           type="number"
                           min="1"
@@ -242,7 +240,7 @@ export default function SettingsPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label>最大采集页数</Label>
+                        <Label className="text-xs font-medium">最大采集页数</Label>
                         <Input
                           type="number"
                           min="1"
@@ -261,9 +259,9 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between border-t pt-4">
+                    <div className="flex items-center justify-between border-t border-border pt-4">
                       <div className="space-y-0.5">
-                        <Label>User-Agent 轮换</Label>
+                        <Label className="text-xs font-medium">User-Agent 轮换</Label>
                         <p className="text-xs text-muted-foreground">
                           自动轮换浏览器标识，降低被检测风险
                         </p>
@@ -279,7 +277,7 @@ export default function SettingsPage() {
                       />
                     </div>
 
-                    <div className="flex justify-end">
+                    <div className="flex justify-end border-t border-border pt-4">
                       <Button
                         onClick={() => saveCrawlerMutation.mutate(crawlerForm)}
                         disabled={saveCrawlerMutation.isPending}
@@ -294,23 +292,23 @@ export default function SettingsPage() {
                     </div>
                   </>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </TabsContent>
 
           {/* Proxy Settings */}
           <TabsContent value="proxy">
-            <Card>
-              <CardHeader>
-                <CardTitle>代理配置</CardTitle>
-                <CardDescription>配置代理服务器以避免 IP 被封</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
+            <div className="bg-card rounded-lg border shadow-soft">
+              <div className="p-6 border-b border-border">
+                <h3 className="text-lg font-semibold">代理配置</h3>
+                <p className="text-sm text-muted-foreground">配置代理服务器以避免 IP 被封</p>
+              </div>
+              <div className="p-6 space-y-6">
                 {proxyForm && (
                   <>
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label>启用代理</Label>
+                        <Label className="text-xs font-medium">启用代理</Label>
                         <p className="text-xs text-muted-foreground">
                           开启后爬虫将通过代理服务器请求
                         </p>
@@ -323,9 +321,9 @@ export default function SettingsPage() {
                       />
                     </div>
 
-                    <div className="flex items-center justify-between border-t pt-4">
+                    <div className="flex items-center justify-between border-t border-border pt-4">
                       <div className="space-y-0.5">
-                        <Label>代理轮换</Label>
+                        <Label className="text-xs font-medium">代理轮换</Label>
                         <p className="text-xs text-muted-foreground">
                           自动轮换使用代理列表中的代理
                         </p>
@@ -338,8 +336,8 @@ export default function SettingsPage() {
                       />
                     </div>
 
-                    <div className="border-t pt-4 space-y-4">
-                      <Label>代理列表</Label>
+                    <div className="border-t border-border pt-4 space-y-4">
+                      <Label className="text-xs font-medium">代理列表</Label>
                       <div className="flex gap-2">
                         <Input
                           placeholder="http://user:pass@host:port"
@@ -359,9 +357,9 @@ export default function SettingsPage() {
                           {proxyForm.list.map((proxy, index) => (
                             <div
                               key={index}
-                              className="flex items-center justify-between bg-slate-50 rounded-lg px-3 py-2"
+                              className="flex items-center justify-between bg-muted rounded-md px-3 py-2"
                             >
-                              <code className="text-sm">{proxy}</code>
+                              <code className="text-sm font-mono">{proxy}</code>
                               <div className="flex gap-2">
                                 <Button
                                   variant="ghost"
@@ -376,7 +374,7 @@ export default function SettingsPage() {
                                   size="sm"
                                   onClick={() => handleRemoveProxy(index)}
                                 >
-                                  <Trash2 className="h-4 w-4 text-red-500" />
+                                  <Trash2 className="h-4 w-4 text-destructive" />
                                 </Button>
                               </div>
                             </div>
@@ -389,7 +387,7 @@ export default function SettingsPage() {
                       )}
                     </div>
 
-                    <div className="flex justify-end border-t pt-4">
+                    <div className="flex justify-end border-t border-border pt-4">
                       <Button
                         onClick={() => saveProxyMutation.mutate(proxyForm)}
                         disabled={saveProxyMutation.isPending}
@@ -404,8 +402,8 @@ export default function SettingsPage() {
                     </div>
                   </>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

@@ -49,68 +49,65 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  /* Clean Dashboard Design - 简洁、专业、和谐 */
+  --radius: 0.5rem;
 
-  /* 背景与前景 */
-  --background: oklch(0.995 0 0);
-  --foreground: oklch(0.145 0.01 260);
+  /* 背景 - 中性灰白 */
+  --background: oklch(0.985 0.002 260);
+  --foreground: oklch(0.145 0.015 260);
 
-  /* 卡片 */
+  /* 卡片 - 纯白 + 柔和边框 */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0.01 260);
+  --card-foreground: oklch(0.145 0.015 260);
 
   /* 弹出层 */
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0.01 260);
+  --popover-foreground: oklch(0.145 0.015 260);
 
-  /* 品牌主色 - 蓝色系 */
-  --primary: oklch(0.55 0.18 250);
+  /* 品牌主色 - 清爽蓝 */
+  --primary: oklch(0.55 0.18 255);
   --primary-foreground: oklch(0.99 0 0);
 
   /* 次要色 */
-  --secondary: oklch(0.96 0.01 260);
-  --secondary-foreground: oklch(0.25 0.01 260);
+  --secondary: oklch(0.96 0.005 260);
+  --secondary-foreground: oklch(0.25 0.015 260);
 
   /* 柔和色 */
   --muted: oklch(0.965 0.005 260);
   --muted-foreground: oklch(0.45 0.01 260);
 
   /* 强调色 */
-  --accent: oklch(0.96 0.01 260);
-  --accent-foreground: oklch(0.25 0.01 260);
+  --accent: oklch(0.96 0.02 255);
+  --accent-foreground: oklch(0.25 0.015 260);
 
-  /* 危险色 */
-  --destructive: oklch(0.55 0.22 25);
-
-  /* 成功色 */
-  --success: oklch(0.55 0.16 150);
+  /* 状态色 - 和谐柔和 */
+  --destructive: oklch(0.60 0.18 25);
+  --success: oklch(0.62 0.15 155);
   --success-foreground: oklch(0.99 0 0);
+  --warning: oklch(0.75 0.14 75);
+  --warning-foreground: oklch(0.25 0.05 65);
 
-  /* 警告色 */
-  --warning: oklch(0.7 0.15 75);
-  --warning-foreground: oklch(0.25 0.05 60);
+  /* 边框 - 轻柔 */
+  --border: oklch(0.91 0.005 260);
+  --input: oklch(0.91 0.005 260);
+  --ring: oklch(0.55 0.18 255);
 
-  /* 边框与输入 */
-  --border: oklch(0.9 0.005 260);
-  --input: oklch(0.9 0.005 260);
-  --ring: oklch(0.55 0.18 250);
+  /* 图表色板 - 同色相分层 (蓝色系) */
+  --chart-1: oklch(0.55 0.18 255);   /* 主蓝 */
+  --chart-2: oklch(0.62 0.15 155);   /* 绿色 - 成功 */
+  --chart-3: oklch(0.75 0.14 75);    /* 琥珀 - 警告 */
+  --chart-4: oklch(0.58 0.14 290);   /* 紫色 */
+  --chart-5: oklch(0.60 0.18 25);    /* 红色 - 错误 */
 
-  /* 图表色板 - 协调的蓝绿橙紫色系 */
-  --chart-1: oklch(0.55 0.18 250);
-  --chart-2: oklch(0.6 0.15 165);
-  --chart-3: oklch(0.65 0.16 55);
-  --chart-4: oklch(0.55 0.18 300);
-  --chart-5: oklch(0.55 0.2 25);
-
-  /* 侧边栏 */
-  --sidebar: oklch(0.995 0 0);
+  /* 侧边栏 - 浅色统一风格 */
+  --sidebar: oklch(0.99 0 0);
   --sidebar-foreground: oklch(0.35 0.01 260);
-  --sidebar-primary: oklch(0.55 0.18 250);
+  --sidebar-primary: oklch(0.55 0.18 255);
   --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.96 0.02 250);
-  --sidebar-accent-foreground: oklch(0.35 0.02 250);
+  --sidebar-accent: oklch(0.96 0.02 255);
+  --sidebar-accent-foreground: oklch(0.25 0.015 260);
   --sidebar-border: oklch(0.92 0.005 260);
-  --sidebar-ring: oklch(0.55 0.18 250);
+  --sidebar-ring: oklch(0.55 0.18 255);
 }
 
 @layer base {
@@ -118,24 +115,70 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
   }
 }
 
-/* 平滑过渡动画 */
+/* 简洁设计系统 */
 @layer utilities {
+  /* 柔和阴影 */
+  .shadow-soft {
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  }
+  .shadow-soft-md {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+  }
+  .shadow-soft-lg {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.06), 0 4px 6px -4px rgb(0 0 0 / 0.06);
+  }
+
+  /* 卡片悬停效果 */
+  .card-hover {
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .card-hover:hover {
+    box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.08);
+    transform: translateY(-1px);
+  }
+
+  /* 简洁边框 */
+  .border-subtle {
+    border-width: 1px;
+    border-color: oklch(0.91 0.005 260);
+  }
+
+  /* 动画 */
   .animate-fade-in {
-    animation: fadeIn 0.15s ease-out;
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
   }
 
   @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
     from {
       opacity: 0;
-      transform: translateY(4px);
+      transform: translateY(8px);
     }
     to {
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  /* 数字等宽 */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 渐变背景 */
+  .bg-gradient-subtle {
+    background: linear-gradient(135deg, oklch(0.98 0.005 260) 0%, oklch(0.985 0.002 260) 100%);
   }
 }

@@ -3,10 +3,8 @@
 import { AppLayout } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
-import { Skeleton, SkeletonCard } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import {
   MapPin,
@@ -22,8 +20,9 @@ import {
   XCircle,
   Clock,
   Loader2,
-  LayoutDashboard,
+  Zap,
   TrendingUp,
+  Database,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
@@ -60,63 +59,57 @@ interface DashboardData {
 }
 
 const taskTypeLabels: Record<string, string> = {
-  job_crawl: "招聘爬虫",
-  rent_crawl: "租房爬虫",
-  forum_crawl: "论坛爬虫",
+  job_crawl: "招聘采集",
+  rent_crawl: "租房采集",
+  forum_crawl: "论坛采集",
   public_data: "公共数据",
 };
 
 const statusConfig: Record<
   string,
-  { label: string; color: string; icon: typeof Clock }
+  { label: string; bg: string; icon: typeof Clock }
 > = {
-  pending: { label: "等待中", color: "bg-warning/10 text-warning-foreground border-warning/20", icon: Clock },
-  running: { label: "运行中", color: "bg-primary/10 text-primary border-primary/20", icon: Loader2 },
-  success: { label: "成功", color: "bg-success/10 text-success border-success/20", icon: CheckCircle2 },
-  failed: { label: "失败", color: "bg-destructive/10 text-destructive border-destructive/20", icon: XCircle },
-  cancelled: { label: "已取消", color: "bg-muted text-muted-foreground border-border", icon: XCircle },
+  pending: { label: "等待", bg: "bg-warning", icon: Clock },
+  running: { label: "运行", bg: "bg-primary", icon: Loader2 },
+  success: { label: "成功", bg: "bg-success", icon: CheckCircle2 },
+  failed: { label: "失败", bg: "bg-destructive", icon: XCircle },
+  cancelled: { label: "取消", bg: "bg-muted-foreground", icon: XCircle },
 };
 
 const quickLinks = [
-  { name: "创建爬虫任务", href: "/tasks", icon: ListTodo, color: "text-primary" },
-  { name: "手动导入数据", href: "/manual-import", icon: Upload, color: "text-chart-4" },
-  { name: "查看数据分析", href: "/analysis", icon: BarChart3, color: "text-success" },
-  { name: "导出报告", href: "/export", icon: FileDown, color: "text-chart-3" },
+  { name: "创建任务", href: "/tasks", icon: ListTodo, accent: "bg-primary" },
+  { name: "导入数据", href: "/manual-import", icon: Upload, accent: "bg-chart-4" },
+  { name: "数据分析", href: "/analysis", icon: BarChart3, accent: "bg-success" },
+  { name: "导出报告", href: "/export", icon: FileDown, accent: "bg-chart-3" },
 ];
 
 interface StatCardProps {
   title: string;
   value: number | string;
-  description: string;
   icon: typeof MapPin;
-  accentColor: string;
+  accent: string;
   isLoading?: boolean;
 }
 
-function StatCard({
-  title,
-  value,
-  description,
-  icon: Icon,
-  accentColor,
-  isLoading,
-}: StatCardProps) {
+function StatCard({ title, value, icon: Icon, accent, isLoading }: StatCardProps) {
   return (
-    <Card className="relative overflow-hidden transition-shadow hover:shadow-md">
-      <div className={cn("absolute left-0 top-0 bottom-0 w-1", accentColor)} />
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className={cn("h-4 w-4", accentColor.replace("bg-", "text-"))} />
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <Skeleton className="h-8 w-20" />
-        ) : (
-          <div className="text-2xl font-bold">{value}</div>
-        )}
-        <p className="text-xs text-muted-foreground">{description}</p>
-      </CardContent>
-    </Card>
+    <div className="group bg-card rounded-lg border shadow-soft card-hover p-5">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs text-muted-foreground font-medium">
+            {title}
+          </p>
+          {isLoading ? (
+            <Skeleton className="h-10 w-24 mt-2" />
+          ) : (
+            <p className="text-3xl font-bold mt-1 tabular-nums">{value}</p>
+          )}
+        </div>
+        <div className={cn("p-2.5 rounded-lg", accent)}>
+          <Icon className="h-5 w-5 text-white" />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -137,182 +130,212 @@ export default function DashboardPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
-        <PageHeader
-          icon={LayoutDashboard}
-          title="仪表盘"
-          description="CityScout 城市分析系统概览"
-        />
+      <div className="space-y-8">
+        {/* Hero Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Zap className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold tracking-tight">仪表盘</h1>
+                <p className="text-sm text-muted-foreground">城市数据采集与分析概览</p>
+              </div>
+            </div>
+          </div>
+          <div className="hidden md:flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-success/10 rounded-full border border-success/20">
+              <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
+              <span className="text-success font-medium">系统运行中</span>
+            </div>
+          </div>
+        </div>
 
-        {/* Data Overview Cards */}
+        {/* Stats Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="目标城市"
             value={counts?.cities ?? "-"}
-            description="已配置的目标城市"
             icon={MapPin}
-            accentColor="bg-primary"
+            accent="bg-primary"
             isLoading={isLoading}
           />
           <StatCard
             title="招聘岗位"
             value={counts?.jobs?.toLocaleString() ?? "-"}
-            description="已采集的招聘数据"
             icon={Briefcase}
-            accentColor="bg-chart-1"
+            accent="bg-chart-1"
             isLoading={isLoading}
           />
           <StatCard
             title="房源信息"
             value={counts?.rent?.toLocaleString() ?? "-"}
-            description="已采集的租房数据"
             icon={Home}
-            accentColor="bg-chart-3"
+            accent="bg-chart-3"
             isLoading={isLoading}
           />
           <StatCard
             title="论坛帖子"
             value={counts?.forum?.toLocaleString() ?? "-"}
-            description="已采集的论坛数据"
             icon={MessageSquare}
-            accentColor="bg-chart-2"
+            accent="bg-chart-2"
             isLoading={isLoading}
           />
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Task Stats */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+        {/* Main Content */}
+        <div className="grid gap-6 lg:grid-cols-5">
+          {/* Task Stats - 3 columns */}
+          <div className="lg:col-span-3 bg-card rounded-lg border shadow-soft p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
                 <ListTodo className="h-5 w-5 text-primary" />
-                爬虫任务统计
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="space-y-3">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-              ) : taskStats ? (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-warning" />
-                      <span className="text-sm">等待中: {taskStats.pending}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-primary" />
-                      <span className="text-sm">运行中: {taskStats.running}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-success" />
-                      <span className="text-sm">成功: {taskStats.success}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-destructive" />
-                      <span className="text-sm">失败: {taskStats.failed}</span>
-                    </div>
-                  </div>
-                  <div className="pt-2 border-t">
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span>总任务数: {taskStats.total}</span>
-                      <span className="flex items-center gap-1">
-                        <TrendingUp className="h-4 w-4" />
-                        总数据量: {counts?.total_data?.toLocaleString() ?? 0}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">暂无数据</p>
-              )}
-            </CardContent>
-          </Card>
+                <h2 className="text-lg font-semibold">任务统计</h2>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Database className="h-4 w-4" />
+                <span className="tabular-nums font-medium">
+                  {counts?.total_data?.toLocaleString() ?? 0} 条数据
+                </span>
+              </div>
+            </div>
 
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>快速操作</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-3">
-                {quickLinks.map((link) => (
-                  <Link key={link.href} href={link.href}>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start gap-2 h-auto py-3 hover:shadow-sm transition-shadow"
-                    >
-                      <link.icon className={cn("h-4 w-4", link.color)} />
-                      <span className="text-sm">{link.name}</span>
-                    </Button>
-                  </Link>
+            {isLoading ? (
+              <div className="grid grid-cols-4 gap-4">
+                {[...Array(4)].map((_, i) => (
+                  <Skeleton key={i} className="h-20" />
                 ))}
               </div>
-            </CardContent>
-          </Card>
+            ) : taskStats ? (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { label: "等待中", value: taskStats.pending, color: "bg-warning" },
+                  { label: "运行中", value: taskStats.running, color: "bg-primary" },
+                  { label: "已完成", value: taskStats.success, color: "bg-success" },
+                  { label: "失败", value: taskStats.failed, color: "bg-destructive" },
+                ].map((stat) => (
+                  <div key={stat.label} className="relative bg-muted rounded-md p-4">
+                    <div className={cn("absolute left-0 top-0 bottom-0 w-1 rounded-l-md", stat.color)} />
+                    <p className="text-xs text-muted-foreground">
+                      {stat.label}
+                    </p>
+                    <p className="text-2xl font-bold mt-1 tabular-nums">{stat.value}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground">暂无数据</p>
+            )}
+
+            {/* Total bar */}
+            {taskStats && taskStats.total > 0 && (
+              <div className="mt-6 pt-4 border-t border-border">
+                <div className="flex items-center justify-between text-sm mb-2">
+                  <span className="text-muted-foreground">任务完成率</span>
+                  <span className="font-semibold tabular-nums">
+                    {Math.round((taskStats.success / taskStats.total) * 100)}%
+                  </span>
+                </div>
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-success rounded-full transition-all duration-500"
+                    style={{ width: `${(taskStats.success / taskStats.total) * 100}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Quick Actions - 2 columns */}
+          <div className="lg:col-span-2 bg-card rounded-lg border shadow-soft p-6">
+            <h2 className="text-lg font-semibold mb-4">快速操作</h2>
+            <div className="grid grid-cols-2 gap-3">
+              {quickLinks.map((link) => (
+                <Link key={link.href} href={link.href}>
+                  <div className="group bg-muted rounded-lg hover:bg-accent p-4 transition-colors cursor-pointer">
+                    <div className={cn("w-fit p-2 rounded-md mb-3", link.accent)}>
+                      <link.icon className="h-4 w-4 text-white" />
+                    </div>
+                    <p className="text-sm font-medium group-hover:text-accent-foreground">
+                      {link.name}
+                    </p>
+                    <ArrowRight className="h-4 w-4 mt-2 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Recent Tasks */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>最近任务</CardTitle>
-            <Link href="/tasks">
-              <Button variant="ghost" size="sm">
-                查看全部 <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
+        <div className="bg-card rounded-lg border shadow-soft">
+          <div className="flex items-center justify-between p-6 border-b border-border">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold">最近任务</h2>
+            </div>
+            <Link
+              href="/tasks"
+              className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+            >
+              查看全部
+              <ArrowRight className="h-4 w-4" />
             </Link>
-          </CardHeader>
-          <CardContent>
+          </div>
+
+          <div className="p-6">
             {isLoading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-4 py-2">
-                    <Skeleton className="h-6 w-16" />
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-2 w-32 ml-auto" />
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="flex items-center gap-4">
+                    <Skeleton className="h-8 w-16" />
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-24 ml-auto" />
                   </div>
                 ))}
               </div>
             ) : recentTasks.length > 0 ? (
               <div className="space-y-3">
-                {recentTasks.map((task) => {
+                {recentTasks.map((task, index) => {
                   const config = statusConfig[task.status] || statusConfig.pending;
                   const StatusIcon = config.icon;
                   return (
                     <div
                       key={task.id}
-                      className="flex items-center justify-between py-2 border-b last:border-0"
+                      className="flex items-center justify-between py-3 border-b border-border last:border-0"
+                      style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <div className="flex items-center gap-3">
-                        <Badge
-                          variant="outline"
-                          className={cn("gap-1", config.color)}
-                        >
+                      <div className="flex items-center gap-4">
+                        <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-md", config.bg)}>
                           <StatusIcon
                             className={cn(
-                              "h-3 w-3",
+                              "h-3.5 w-3.5 text-white",
                               task.status === "running" && "animate-spin"
                             )}
                           />
-                          {config.label}
-                        </Badge>
-                        <span className="text-sm font-medium">
+                          <span className="text-xs font-medium text-white">
+                            {config.label}
+                          </span>
+                        </div>
+                        <span className="font-medium">
                           {taskTypeLabels[task.task_type] || task.task_type}
                         </span>
                       </div>
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-6">
                         {task.status === "running" && (
-                          <div className="w-24">
+                          <div className="w-32">
+                            <div className="flex items-center justify-between text-xs mb-1">
+                              <span className="text-muted-foreground">进度</span>
+                              <span className="font-medium tabular-nums">{task.progress}%</span>
+                            </div>
                             <Progress value={task.progress} className="h-1.5" />
                           </div>
                         )}
-                        <span className="text-sm text-muted-foreground">
-                          {task.records_count} 条数据
+                        <span className="text-sm tabular-nums text-muted-foreground min-w-[80px] text-right">
+                          {task.records_count.toLocaleString()} 条
                         </span>
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-sm text-muted-foreground min-w-[80px]">
                           {new Date(task.created_at).toLocaleDateString("zh-CN")}
                         </span>
                       </div>
@@ -326,14 +349,14 @@ export default function DashboardPage() {
                 title="暂无任务记录"
                 description="开始创建第一个爬虫任务来采集城市数据"
                 action={{
-                  label: "创建爬虫任务",
+                  label: "创建任务",
                   onClick: () => (window.location.href = "/tasks"),
                   icon: ListTodo,
                 }}
               />
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </AppLayout>
   );

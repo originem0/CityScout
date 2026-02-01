@@ -10,7 +10,7 @@ from sqlalchemy import (
     Text,
     func,
 )
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -50,6 +50,19 @@ class CrawlTask(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+
+    # 新增字段：细粒度进度跟踪
+    current_state: Mapped[str] = mapped_column(
+        String(30), nullable=False, default="init"
+    )  # init/connecting/loading/parsing/saving/paginating/completed/failed
+    current_page: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    total_pages: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    items_found: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    items_failed: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    error_type: Mapped[str | None] = mapped_column(
+        String(30), nullable=True
+    )  # timeout/blocked/captcha/parse_error/network/rate_limit/db_error/unknown
+    error_details: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
     # Relationships
     data_source = relationship("DataSource", lazy="joined")

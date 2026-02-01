@@ -6,6 +6,7 @@ from app.models.job import Job
 from app.models.rent import Rent
 from app.models.forum_post import ForumPost
 from app.models.city_stats import CityStats
+from app.models.company_review import CompanyReview
 
 __all__ = [
     "City",
@@ -16,4 +17,5 @@ __all__ = [
     "Rent",
     "ForumPost",
     "CityStats",
+    "CompanyReview",
 ]

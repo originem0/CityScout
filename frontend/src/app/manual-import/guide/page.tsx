@@ -28,10 +28,10 @@ const platformIcons: Record<string, React.ReactNode> = {
 };
 
 const platformColors: Record<string, string> = {
-  boss: "bg-green-100 text-green-800",
-  zhihu: "bg-blue-100 text-blue-800",
-  weibo: "bg-red-100 text-red-800",
-  xiaohongshu: "bg-pink-100 text-pink-800",
+  boss: "bg-success/10 text-success",
+  zhihu: "bg-primary/10 text-primary",
+  weibo: "bg-destructive/10 text-destructive",
+  xiaohongshu: "bg-chart-4/10 text-chart-4",
 };
 
 export default function SearchGuidePage() {
@@ -62,8 +62,8 @@ export default function SearchGuidePage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">搜索指南</h1>
-            <p className="text-slate-500">
+            <h1 className="text-xl font-semibold">搜索指南</h1>
+            <p className="text-sm text-muted-foreground">
               为反爬困难的网站生成搜索链接，方便手动采集数据
             </p>
           </div>
@@ -80,12 +80,12 @@ export default function SearchGuidePage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ol className="list-decimal list-inside space-y-2 text-slate-600">
+            <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
               <li>点击下方链接，在新窗口打开目标网站的搜索页面</li>
               <li>手动浏览搜索结果，复制有价值的内容</li>
               <li>
                 前往{" "}
-                <a href="/manual-import" className="text-blue-600 underline">
+                <a href="/manual-import" className="text-primary underline">
                   数据导入页面
                 </a>
                 ，将数据导入系统
@@ -95,7 +95,7 @@ export default function SearchGuidePage() {
         </Card>
 
         {isLoading ? (
-          <div className="text-center py-8 text-slate-500">加载中...</div>
+          <div className="text-center py-8 text-muted-foreground">加载中...</div>
         ) : guides && guides.length > 0 ? (
           <Tabs defaultValue={guides[0].platform}>
             <TabsList className="grid w-full grid-cols-4">
@@ -138,16 +138,16 @@ export default function SearchGuidePage() {
                         guide.search_urls.map((item, i) => (
                           <div
                             key={i}
-                            className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+                            className="flex items-center justify-between p-3 bg-muted rounded-lg"
                           >
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
                                 <Badge variant="outline">{item.city}</Badge>
-                                <span className="text-sm text-slate-600">
+                                <span className="text-sm text-muted-foreground">
                                   {item.keyword}
                                 </span>
                               </div>
-                              <p className="text-xs text-slate-400 truncate mt-1">
+                              <p className="text-xs text-muted-foreground truncate mt-1">
                                 {item.url}
                               </p>
                             </div>
@@ -159,7 +159,7 @@ export default function SearchGuidePage() {
                                 title="复制链接"
                               >
                                 {copiedUrl === item.url ? (
-                                  <Check className="h-4 w-4 text-green-600" />
+                                  <Check className="h-4 w-4 text-success" />
                                 ) : (
                                   <Copy className="h-4 w-4" />
                                 )}
@@ -176,7 +176,7 @@ export default function SearchGuidePage() {
                           </div>
                         ))
                       ) : (
-                        <p className="text-center text-slate-500 py-4">
+                        <p className="text-center text-muted-foreground py-4">
                           暂无搜索链接，请先添加城市和关键词
                         </p>
                       )}
@@ -188,7 +188,7 @@ export default function SearchGuidePage() {
           </Tabs>
         ) : (
           <Card>
-            <CardContent className="py-8 text-center text-slate-500">
+            <CardContent className="py-8 text-center text-muted-foreground">
               暂无搜索指南，请先配置城市和关键词
             </CardContent>
           </Card>

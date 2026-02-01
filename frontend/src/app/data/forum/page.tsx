@@ -47,7 +47,7 @@ const columns: ColumnDef<ForumPostListItem>[] = [
           <div className="font-medium truncate">
             {title || content.slice(0, 30) + "..."}
           </div>
-          <div className="text-xs text-slate-500 truncate">
+          <div className="text-xs text-muted-foreground truncate">
             {row.original.author || "匿名"}
           </div>
         </div>
@@ -86,8 +86,8 @@ const columns: ColumnDef<ForumPostListItem>[] = [
           variant="outline"
           className={
             type === "post"
-              ? "bg-blue-50 text-blue-700"
-              : "bg-gray-50 text-gray-700"
+              ? "bg-primary/10 text-primary"
+              : "bg-muted text-muted-foreground"
           }
         >
           {type === "post" ? "帖子" : "回复"}
@@ -100,7 +100,7 @@ const columns: ColumnDef<ForumPostListItem>[] = [
     header: "点赞",
     cell: ({ row }) => (
       <div className="flex items-center gap-1">
-        <ThumbsUp className="h-3 w-3 text-slate-400" />
+        <ThumbsUp className="h-3 w-3 text-muted-foreground" />
         {row.getValue("likes")}
       </div>
     ),
@@ -110,7 +110,7 @@ const columns: ColumnDef<ForumPostListItem>[] = [
     header: "回复",
     cell: ({ row }) => (
       <div className="flex items-center gap-1">
-        <MessageCircle className="h-3 w-3 text-slate-400" />
+        <MessageCircle className="h-3 w-3 text-muted-foreground" />
         {row.getValue("replies_count")}
       </div>
     ),
@@ -119,7 +119,7 @@ const columns: ColumnDef<ForumPostListItem>[] = [
     accessorKey: "data_source_name",
     header: "来源",
     cell: ({ row }) => (
-      <Badge variant="outline" className="bg-green-50">
+      <Badge variant="outline" className="bg-accent">
         {row.getValue("data_source_name") || "-"}
       </Badge>
     ),
@@ -201,11 +201,11 @@ export default function ForumDataPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <MessageSquare className="h-8 w-8" />
+            <h1 className="text-xl font-semibold flex items-center gap-2">
+              <MessageSquare className="h-6 w-6 text-primary" />
               论坛数据
             </h1>
-            <p className="text-slate-500">浏览已采集的论坛帖子和评论</p>
+            <p className="text-sm text-muted-foreground">浏览已采集的论坛帖子和评论</p>
           </div>
           <Button variant="outline" onClick={() => refetch()}>
             <RefreshCw className="h-4 w-4 mr-2" />
@@ -218,7 +218,7 @@ export default function ForumDataPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-slate-500">总帖子数</CardTitle>
+                <CardTitle className="text-sm text-muted-foreground">总帖子数</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.total}</div>
@@ -226,27 +226,27 @@ export default function ForumDataPage() {
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-slate-500">总点赞数</CardTitle>
+                <CardTitle className="text-sm text-muted-foreground">总点赞数</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-pink-600">
+                <div className="text-2xl font-bold text-destructive">
                   {stats.total_likes}
                 </div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-slate-500">总回复数</CardTitle>
+                <CardTitle className="text-sm text-muted-foreground">总回复数</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-blue-600">
+                <div className="text-2xl font-bold text-primary">
                   {stats.total_replies}
                 </div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-slate-500">平均点赞</CardTitle>
+                <CardTitle className="text-sm text-muted-foreground">平均点赞</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
@@ -351,13 +351,13 @@ export default function ForumDataPage() {
                       <Badge variant="secondary">{selectedPost.topic}</Badge>
                     )}
                     {selectedPost.data_source_name && (
-                      <Badge variant="outline" className="bg-green-50">
+                      <Badge variant="outline" className="bg-accent">
                         {selectedPost.data_source_name}
                       </Badge>
                     )}
                   </div>
 
-                  <div className="flex gap-4 text-sm text-slate-500">
+                  <div className="flex gap-4 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <ThumbsUp className="h-4 w-4" />
                       {selectedPost.likes} 点赞
@@ -371,7 +371,7 @@ export default function ForumDataPage() {
                     )}
                   </div>
 
-                  <div className="border rounded-lg p-4 bg-slate-50">
+                  <div className="border rounded-lg p-4 bg-muted">
                     <p className="text-sm whitespace-pre-wrap leading-relaxed">
                       {selectedPost.content}
                     </p>
@@ -388,7 +388,7 @@ export default function ForumDataPage() {
                   )}
 
                   {selectedPost.search_keyword && (
-                    <div className="text-sm text-slate-500">
+                    <div className="text-sm text-muted-foreground">
                       搜索关键词: {selectedPost.search_keyword}
                     </div>
                   )}

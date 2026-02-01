@@ -155,7 +155,7 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
                         <SelectItem key={option.value} value={option.value}>
                           <div>
                             <span>{option.label}</span>
-                            <span className="ml-2 text-xs text-slate-500">
+                            <span className="ml-2 text-xs text-muted-foreground">
                               {option.description}
                             </span>
                           </div>

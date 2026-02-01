@@ -78,6 +78,20 @@ class Job(Base):
     # Benefits/welfare
     benefits: Mapped[str | None] = mapped_column(Text, nullable=True)
 
+    # Company review data (from 看准网/职友集)
+    company_rating: Mapped[Decimal | None] = mapped_column(
+        Numeric(3, 2), nullable=True
+    )  # Overall company rating (1-5)
+    salary_percentile_25: Mapped[Decimal | None] = mapped_column(
+        Numeric(10, 2), nullable=True
+    )  # 25th percentile salary
+    salary_percentile_50: Mapped[Decimal | None] = mapped_column(
+        Numeric(10, 2), nullable=True
+    )  # Median salary
+    salary_percentile_75: Mapped[Decimal | None] = mapped_column(
+        Numeric(10, 2), nullable=True
+    )  # 75th percentile salary
+
     # Metadata
     posted_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True

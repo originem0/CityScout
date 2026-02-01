@@ -35,7 +35,7 @@ const columns: ColumnDef<RentListItem>[] = [
     cell: ({ row }) => (
       <div className="max-w-[200px]">
         <div className="font-medium truncate">{row.getValue("title")}</div>
-        <div className="text-xs text-slate-500">{row.original.neighborhood}</div>
+        <div className="text-xs text-muted-foreground">{row.original.neighborhood}</div>
       </div>
     ),
   },
@@ -60,10 +60,10 @@ const columns: ColumnDef<RentListItem>[] = [
           variant="outline"
           className={
             type === "整租"
-              ? "bg-blue-50 text-blue-700"
+              ? "bg-primary/10 text-primary"
               : type === "合租"
-              ? "bg-orange-50 text-orange-700"
-              : "bg-purple-50 text-purple-700"
+              ? "bg-warning/10 text-warning-foreground"
+              : "bg-chart-4/10 text-chart-4"
           }
         >
           {type}
@@ -77,7 +77,7 @@ const columns: ColumnDef<RentListItem>[] = [
     accessorKey: "price_raw",
     header: "价格",
     cell: ({ row }) => (
-      <span className="text-orange-600 font-medium">
+      <span className="text-chart-3 font-medium">
         {row.getValue("price_raw") || "-"}
       </span>
     ),
@@ -112,7 +112,7 @@ const columns: ColumnDef<RentListItem>[] = [
     accessorKey: "data_source_name",
     header: "来源",
     cell: ({ row }) => (
-      <Badge variant="outline" className="bg-blue-50">
+      <Badge variant="outline" className="bg-accent">
         {row.getValue("data_source_name") || "-"}
       </Badge>
     ),
@@ -189,11 +189,11 @@ export default function RentDataPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Home className="h-8 w-8" />
+            <h1 className="text-xl font-semibold flex items-center gap-2">
+              <Home className="h-6 w-6 text-primary" />
               租房数据
             </h1>
-            <p className="text-slate-500">浏览已采集的租房信息</p>
+            <p className="text-sm text-muted-foreground">浏览已采集的租房信息</p>
           </div>
           <Button variant="outline" onClick={() => refetch()}>
             <RefreshCw className="h-4 w-4 mr-2" />
@@ -206,7 +206,7 @@ export default function RentDataPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-slate-500">总数量</CardTitle>
+                <CardTitle className="text-sm text-muted-foreground">总数量</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.total}</div>
@@ -214,17 +214,17 @@ export default function RentDataPage() {
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-slate-500">平均价格</CardTitle>
+                <CardTitle className="text-sm text-muted-foreground">平均价格</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-orange-600">
+                <div className="text-2xl font-bold text-chart-3">
                   {stats.avg_price ? `${Math.round(stats.avg_price)}元` : "-"}
                 </div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-slate-500">价格范围</CardTitle>
+                <CardTitle className="text-sm text-muted-foreground">价格范围</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
@@ -236,7 +236,7 @@ export default function RentDataPage() {
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-slate-500">平均面积</CardTitle>
+                <CardTitle className="text-sm text-muted-foreground">平均面积</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
@@ -323,7 +323,7 @@ export default function RentDataPage() {
                 </SheetHeader>
                 <div className="mt-6 space-y-4">
                   <div className="flex flex-wrap gap-2">
-                    <Badge className="bg-orange-100 text-orange-800 text-lg px-3 py-1">
+                    <Badge className="bg-chart-3/10 text-chart-3 border-chart-3/20 text-lg px-3 py-1">
                       {selectedRent.price_raw || "价格面议"}
                     </Badge>
                     {selectedRent.property_type && (
@@ -333,34 +333,34 @@ export default function RentDataPage() {
 
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="text-slate-500">面积:</span>{" "}
+                      <span className="text-muted-foreground">面积:</span>{" "}
                       {selectedRent.area ? `${selectedRent.area}㎡` : "-"}
                     </div>
                     <div>
-                      <span className="text-slate-500">户型:</span>{" "}
+                      <span className="text-muted-foreground">户型:</span>{" "}
                       {selectedRent.layout || "-"}
                     </div>
                     <div>
-                      <span className="text-slate-500">楼层:</span>{" "}
+                      <span className="text-muted-foreground">楼层:</span>{" "}
                       {selectedRent.floor || "-"}
                     </div>
                     <div>
-                      <span className="text-slate-500">朝向:</span>{" "}
+                      <span className="text-muted-foreground">朝向:</span>{" "}
                       {selectedRent.orientation || "-"}
                     </div>
                     <div>
-                      <span className="text-slate-500">装修:</span>{" "}
+                      <span className="text-muted-foreground">装修:</span>{" "}
                       {selectedRent.decoration || "-"}
                     </div>
                     <div>
-                      <span className="text-slate-500">付款:</span>{" "}
+                      <span className="text-muted-foreground">付款:</span>{" "}
                       {selectedRent.payment_type || "-"}
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
-                      <MapPin className="h-4 w-4 text-slate-400" />
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
                       <span>
                         {selectedRent.city_name} {selectedRent.district}{" "}
                         {selectedRent.address}
@@ -368,7 +368,7 @@ export default function RentDataPage() {
                     </div>
                     {selectedRent.subway_info && (
                       <div className="flex items-center gap-2 text-sm">
-                        <Train className="h-4 w-4 text-slate-400" />
+                        <Train className="h-4 w-4 text-muted-foreground" />
                         <span>{selectedRent.subway_info}</span>
                       </div>
                     )}
@@ -390,7 +390,7 @@ export default function RentDataPage() {
                   {selectedRent.description && (
                     <div>
                       <h4 className="font-medium mb-2">房源描述</h4>
-                      <p className="text-sm text-slate-600 whitespace-pre-wrap">
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                         {selectedRent.description}
                       </p>
                     </div>
@@ -398,7 +398,7 @@ export default function RentDataPage() {
 
                   {selectedRent.agent_name && (
                     <div className="text-sm">
-                      <span className="text-slate-500">联系人:</span>{" "}
+                      <span className="text-muted-foreground">联系人:</span>{" "}
                       {selectedRent.agent_name}
                       {selectedRent.agent_phone && ` (${selectedRent.agent_phone})`}
                     </div>

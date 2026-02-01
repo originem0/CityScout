@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -12,12 +11,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Pencil, Trash2, RefreshCw } from "lucide-react";
+import { PageHeader } from "@/components/common/page-header";
+import { EmptyState } from "@/components/common/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Plus, Pencil, Trash2, RefreshCw, Tags } from "lucide-react";
 import { useKeywords, useDeleteKeyword } from "@/hooks/use-keywords";
 import { KeywordFormDialog } from "@/components/features/keywords/keyword-form-dialog";
 import { DeleteConfirmDialog } from "@/components/common/delete-confirm-dialog";
+import { cn } from "@/lib/utils";
 import type { Keyword } from "@/types";
 
 const categoryLabels: Record<string, string> = {
@@ -27,9 +29,9 @@ const categoryLabels: Record<string, string> = {
 };
 
 const categoryColors: Record<string, string> = {
-  job_search: "bg-green-100 text-green-800",
-  job_exclude: "bg-red-100 text-red-800",
-  forum_topic: "bg-purple-100 text-purple-800",
+  job_search: "bg-success",
+  job_exclude: "bg-destructive",
+  forum_topic: "bg-chart-4",
 };
 
 const priorityLabels: Record<string, string> = {
@@ -72,7 +74,6 @@ export default function KeywordsPage() {
     }
   };
 
-  // 统计各类关键词数量
   const allKeywords = keywords || [];
   const counts = {
     all: allKeywords.length,
@@ -84,21 +85,22 @@ export default function KeywordsPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">关键词管理</h1>
-            <p className="text-slate-500">管理搜索关键词和排除关键词</p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="icon" onClick={() => refetch()}>
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-            <Button onClick={handleAdd}>
-              <Plus className="mr-2 h-4 w-4" />
-              添加关键词
-            </Button>
-          </div>
-        </div>
+        <PageHeader
+          icon={Tags}
+          title="关键词管理"
+          description="管理搜索关键词和排除关键词"
+          actions={
+            <>
+              <Button variant="outline" size="icon" onClick={() => refetch()}>
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+              <Button onClick={handleAdd}>
+                <Plus className="mr-2 h-4 w-4" />
+                添加关键词
+              </Button>
+            </>
+          }
+        />
 
         <Tabs value={categoryFilter} onValueChange={setCategoryFilter}>
           <TabsList>
@@ -115,64 +117,82 @@ export default function KeywordsPage() {
           </TabsList>
         </Tabs>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              关键词列表
-              {keywords && keywords.length > 0 && (
-                <span className="ml-2 text-sm font-normal text-slate-500">
-                  共 {keywords.length} 个关键词
-                </span>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="bg-card rounded-lg border shadow-soft">
+          <div className="flex items-center justify-between p-6 border-b border-border">
+            <h2 className="text-lg font-semibold">关键词列表</h2>
+            {keywords && keywords.length > 0 && (
+              <span className="text-sm text-muted-foreground">
+                共 <span className="font-bold tabular-nums">{keywords.length}</span> 个关键词
+              </span>
+            )}
+          </div>
+          <div className="p-6">
             {isLoading ? (
-              <p className="text-center py-8 text-slate-500">加载中...</p>
+              <div className="space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-4 py-3">
+                    <Skeleton className="h-4 w-8" />
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-6 w-20" />
+                    <Skeleton className="h-6 w-16" />
+                    <Skeleton className="h-8 w-16 ml-auto" />
+                  </div>
+                ))}
+              </div>
             ) : keywords && keywords.length > 0 ? (
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[50px]">ID</TableHead>
-                    <TableHead>关键词</TableHead>
-                    <TableHead>类型</TableHead>
-                    <TableHead>优先级</TableHead>
-                    <TableHead>状态</TableHead>
-                    <TableHead className="text-right">操作</TableHead>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="w-[60px] text-xs font-medium text-muted-foreground">ID</TableHead>
+                    <TableHead className="text-xs font-medium text-muted-foreground">关键词</TableHead>
+                    <TableHead className="text-xs font-medium text-muted-foreground">类型</TableHead>
+                    <TableHead className="text-xs font-medium text-muted-foreground">优先级</TableHead>
+                    <TableHead className="text-xs font-medium text-muted-foreground">状态</TableHead>
+                    <TableHead className="text-right text-xs font-medium text-muted-foreground">操作</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {keywords.map((keyword) => (
-                    <TableRow key={keyword.id}>
-                      <TableCell className="text-slate-500">
+                    <TableRow key={keyword.id} className="hover:bg-muted/50">
+                      <TableCell className="text-muted-foreground tabular-nums">
                         {keyword.id}
                       </TableCell>
                       <TableCell className="font-medium">
                         {keyword.keyword}
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant="secondary"
-                          className={categoryColors[keyword.category] || ""}
+                        <span
+                          className={cn(
+                            "inline-flex items-center px-2 py-0.5 text-xs font-medium text-white rounded-md",
+                            categoryColors[keyword.category] || "bg-muted-foreground"
+                          )}
                         >
                           {categoryLabels[keyword.category] || keyword.category}
-                        </Badge>
+                        </span>
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant={
-                            keyword.priority === "core" ? "default" : "outline"
-                          }
+                        <span
+                          className={cn(
+                            "inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-md",
+                            keyword.priority === "core"
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted text-muted-foreground"
+                          )}
                         >
                           {priorityLabels[keyword.priority] || keyword.priority}
-                        </Badge>
+                        </span>
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant={keyword.enabled ? "default" : "secondary"}
+                        <span
+                          className={cn(
+                            "inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-md",
+                            keyword.enabled
+                              ? "bg-success text-white"
+                              : "bg-muted text-muted-foreground"
+                          )}
                         >
                           {keyword.enabled ? "启用" : "禁用"}
-                        </Badge>
+                        </span>
                       </TableCell>
                       <TableCell className="text-right">
                         <Button
@@ -187,7 +207,7 @@ export default function KeywordsPage() {
                           size="icon"
                           onClick={() => handleDeleteClick(keyword)}
                         >
-                          <Trash2 className="h-4 w-4 text-red-500" />
+                          <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -195,18 +215,19 @@ export default function KeywordsPage() {
                 </TableBody>
               </Table>
             ) : (
-              <div className="text-center py-12">
-                <p className="text-slate-500 mb-4">
-                  暂无关键词数据，点击"添加关键词"开始配置
-                </p>
-                <Button onClick={handleAdd}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  添加第一个关键词
-                </Button>
-              </div>
+              <EmptyState
+                icon={Tags}
+                title="暂无关键词数据"
+                description="点击添加关键词开始配置"
+                action={{
+                  label: "添加第一个关键词",
+                  onClick: handleAdd,
+                  icon: Plus,
+                }}
+              />
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       <KeywordFormDialog

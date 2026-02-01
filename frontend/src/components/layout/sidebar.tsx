@@ -19,8 +19,8 @@ import {
   ScrollText,
   ChevronLeft,
   ChevronRight,
+  Compass,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const navigation = [
   { name: "仪表盘", href: "/dashboard", icon: LayoutDashboard },
@@ -64,37 +64,40 @@ export function SidebarContent({
       <div
         className={cn(
           "flex h-16 items-center border-b border-sidebar-border",
-          collapsed ? "justify-center px-2" : "justify-between px-4"
+          collapsed ? "justify-center px-3" : "justify-between px-4"
         )}
       >
         <Link
           href="/dashboard"
-          className="flex items-center gap-2"
+          className="flex items-center gap-2.5 group"
           onClick={onNavigate}
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <MapPin className="h-5 w-5 text-primary-foreground" />
+          <div className="flex h-9 w-9 items-center justify-center bg-primary rounded-lg">
+            <Compass className="h-5 w-5 text-primary-foreground" />
           </div>
           {!collapsed && (
-            <span className="text-lg font-semibold text-foreground">
-              CityScout
-            </span>
+            <div className="flex flex-col">
+              <span className="text-base font-semibold tracking-tight text-sidebar-foreground">
+                CityScout
+              </span>
+              <span className="text-[10px] text-muted-foreground">
+                城市数据分析
+              </span>
+            </div>
           )}
         </Link>
         {onToggleCollapse && !collapsed && (
-          <Button
-            variant="ghost"
-            size="icon"
+          <button
             onClick={onToggleCollapse}
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
-          </Button>
+          </button>
         )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-2 py-4">
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
         <div className="space-y-1">
           {navigation.map((item) => {
             const isActive =
@@ -107,27 +110,27 @@ export function SidebarContent({
                   href={item.href}
                   onClick={onNavigate}
                   className={cn(
-                    "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    "group flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors",
                     collapsed && "justify-center px-2",
                     isActive
-                      ? "bg-sidebar-accent text-sidebar-primary"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                      : "text-sidebar-foreground hover:text-foreground hover:bg-sidebar-accent"
                   )}
                   title={collapsed ? item.name : undefined}
                 >
                   <Icon
                     className={cn(
-                      "h-5 w-5 flex-shrink-0",
+                      "h-[18px] w-[18px] flex-shrink-0",
                       isActive
-                        ? "text-sidebar-primary"
-                        : "text-sidebar-foreground group-hover:text-sidebar-accent-foreground"
+                        ? "text-sidebar-primary-foreground"
+                        : "text-muted-foreground group-hover:text-foreground"
                     )}
                   />
-                  {!collapsed && item.name}
+                  {!collapsed && <span>{item.name}</span>}
                 </Link>
-                {/* Children - only show when not collapsed and parent is active */}
+                {/* Children */}
                 {item.children && isActive && !collapsed && (
-                  <div className="ml-4 mt-1 space-y-1 border-l-2 border-sidebar-border pl-4">
+                  <div className="ml-5 mt-1 space-y-0.5 border-l border-sidebar-border pl-3">
                     {item.children.map((child) => {
                       const ChildIcon = child.icon;
                       const isChildActive = pathname === child.href;
@@ -137,13 +140,13 @@ export function SidebarContent({
                           href={child.href}
                           onClick={onNavigate}
                           className={cn(
-                            "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
+                            "flex items-center gap-2 px-2 py-1.5 text-sm rounded-md transition-colors",
                             isChildActive
-                              ? "text-sidebar-primary font-medium"
-                              : "text-muted-foreground hover:text-sidebar-foreground"
+                              ? "text-primary font-medium bg-sidebar-accent"
+                              : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent"
                           )}
                         >
-                          <ChildIcon className="h-4 w-4" />
+                          <ChildIcon className="h-3.5 w-3.5" />
                           {child.name}
                         </Link>
                       );
@@ -159,23 +162,27 @@ export function SidebarContent({
       {/* Footer */}
       <div
         className={cn(
-          "border-t border-sidebar-border p-4",
-          collapsed && "px-2 py-3"
+          "border-t border-sidebar-border p-3",
+          collapsed && "px-2"
         )}
       >
         {collapsed ? (
-          <Button
-            variant="ghost"
-            size="icon"
+          <button
             onClick={onToggleCollapse}
-            className="w-full h-8 text-muted-foreground hover:text-foreground"
+            className="flex w-full h-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors"
           >
             <ChevronRight className="h-4 w-4" />
-          </Button>
+          </button>
         ) : (
-          <p className="text-xs text-muted-foreground text-center">
-            CityScout v1.0
-          </p>
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs text-muted-foreground">
+              v1.0.0
+            </span>
+            <div className="flex items-center gap-1.5">
+              <div className="h-2 w-2 rounded-full bg-success" />
+              <span className="text-xs text-muted-foreground">在线</span>
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -192,7 +199,7 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
     <div
       className={cn(
         "h-full transition-all duration-200",
-        collapsed ? "w-16" : "w-52"
+        collapsed ? "w-16" : "w-56"
       )}
     >
       <SidebarContent collapsed={collapsed} onToggleCollapse={onToggleCollapse} />

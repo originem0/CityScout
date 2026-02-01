@@ -4,7 +4,7 @@ from sqlalchemy import select, func, case, distinct
 from sqlalchemy.orm import joinedload
 
 from app.api.deps import DbSession
-from app.models import Job, Rent, ForumPost, City
+from app.models import Job, Rent, ForumPost, City, CityStats
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
 
@@ -80,12 +80,21 @@ async def city_comparison(
     forum_result = await db.execute(forum_stats_query)
     forum_stats = {r.city_id: r for r in forum_result.all()}
 
+    # City stats (公开统计数据)
+    city_stats_query = (
+        select(CityStats)
+        .where(CityStats.city_id.in_(city_id_list))
+    )
+    city_stats_result = await db.execute(city_stats_query)
+    city_stats = {r.city_id: r for r in city_stats_result.scalars().all()}
+
     # Build comparison data
     comparison = []
     for city in cities:
         js = job_stats.get(city.id)
         rs = rent_stats.get(city.id)
         fs = forum_stats.get(city.id)
+        cs = city_stats.get(city.id)
 
         avg_salary = float(js.avg_salary) if js and js.avg_salary else None
         avg_rent = float(rs.avg_rent) if rs and rs.avg_rent else None
@@ -100,19 +109,35 @@ async def city_comparison(
             "city_name": city.name,
             "province": city.province,
             "tier": city.tier,
+            # 爬取的职位数据
             "job_count": js.job_count if js else 0,
             "avg_salary_min": round(float(js.avg_salary_min), 0) if js and js.avg_salary_min else None,
             "avg_salary_max": round(float(js.avg_salary_max), 0) if js and js.avg_salary_max else None,
             "avg_salary": round(avg_salary, 0) if avg_salary else None,
+            # 爬取的租房数据
             "rent_count": rs.rent_count if rs else 0,
             "avg_rent": round(avg_rent, 0) if avg_rent else None,
             "min_rent": round(float(rs.min_rent), 0) if rs and rs.min_rent else None,
             "max_rent": round(float(rs.max_rent), 0) if rs and rs.max_rent else None,
             "avg_area": round(float(rs.avg_area), 1) if rs and rs.avg_area else None,
+            # 论坛数据
             "post_count": fs.post_count if fs else 0,
             "total_likes": fs.total_likes if fs else 0,
             "total_replies": fs.total_replies if fs else 0,
+            # 计算指标
             "salary_rent_ratio": salary_rent_ratio,
+            # 公开统计数据 (city_stats)
+            "population": float(cs.population) if cs and cs.population else None,
+            "gdp": float(cs.gdp) if cs and cs.gdp else None,
+            "gdp_per_capita": float(cs.gdp_per_capita) if cs and cs.gdp_per_capita else None,
+            "official_avg_salary": float(cs.avg_salary) if cs and cs.avg_salary else None,
+            "living_cost_index": float(cs.living_cost_index) if cs and cs.living_cost_index else None,
+            "housing_price": float(cs.housing_price) if cs and cs.housing_price else None,
+            "avg_temp_year": float(cs.avg_temp_year) if cs and cs.avg_temp_year else None,
+            "avg_temp_summer": float(cs.avg_temp_summer) if cs and cs.avg_temp_summer else None,
+            "avg_temp_winter": float(cs.avg_temp_winter) if cs and cs.avg_temp_winter else None,
+            "air_quality_index": cs.air_quality_index if cs else None,
+            "sunny_days": cs.sunny_days if cs else None,
         })
 
     return {
@@ -393,3 +418,45 @@ async def city_scores(
         "weights": w,
         "scores": scores,
     }
+
+
+@router.get("/skills-trend")
+async def skills_trend(
+    db: DbSession,
+    city_id: int | None = Query(None, description="Filter by city ID"),
+    limit: int = Query(30, ge=1, le=100, description="Number of top skills to return"),
+):
+    """Analyze skill keyword trends from job descriptions.
+
+    Extracts technical skills from job descriptions and returns
+    frequency rankings by skill and category.
+    """
+    from app.services.jd_parser import analyze_skill_trends
+
+    # Build query for job descriptions
+    query = select(Job.description).where(Job.description.isnot(None))
+    if city_id:
+        query = query.where(Job.city_id == city_id)
+
+    result = await db.execute(query)
+    descriptions = [row[0] for row in result.all() if row[0]]
+
+    if not descriptions:
+        return {
+            "total_jobs_analyzed": 0,
+            "unique_skills_found": 0,
+            "top_skills": [],
+            "category_distribution": [],
+            "city_id": city_id,
+        }
+
+    # Analyze skills
+    trend_data = analyze_skill_trends(descriptions)
+    trend_data["city_id"] = city_id
+
+    # Limit top skills
+    if len(trend_data["top_skills"]) > limit:
+        trend_data["top_skills"] = trend_data["top_skills"][:limit]
+
+    return trend_data
+

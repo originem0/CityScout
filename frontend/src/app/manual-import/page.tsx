@@ -187,8 +187,8 @@ export default function ManualImportPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">数据导入</h1>
-            <p className="text-slate-500">手动导入数据到系统</p>
+            <h1 className="text-xl font-semibold">数据导入</h1>
+            <p className="text-sm text-muted-foreground">手动导入数据到系统</p>
           </div>
           <Button variant="outline" asChild>
             <Link href="/manual-import/guide">
@@ -305,7 +305,7 @@ export default function ManualImportPage() {
                     onChange={handleFileChange}
                   />
                   {file && (
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-muted-foreground">
                       已选择: {file.name} (
                       {(file.size / 1024).toFixed(1)} KB)
                     </p>

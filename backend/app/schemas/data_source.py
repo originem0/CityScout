@@ -10,6 +10,8 @@ class DataSourceType(str, Enum):
     rent = "rent"
     forum = "forum"
     public_data = "public_data"
+    company_review = "company_review"
+    salary_stats = "salary_stats"
 
 
 class DataSourceBase(BaseModel):

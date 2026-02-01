@@ -377,3 +377,6 @@ export interface AiReportResponse {
   city_count: number;
   generated_at: string;
 }
+
+// Re-export WebSocket types
+export * from "./websocket";

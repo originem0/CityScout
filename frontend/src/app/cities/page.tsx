@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -12,7 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
@@ -31,11 +29,11 @@ const tierLabels: Record<string, string> = {
   tier3: "三线",
 };
 
-const tierColors: Record<string, { dot: string; text: string }> = {
-  tier1: { dot: "bg-destructive", text: "text-destructive" },
-  new_tier1: { dot: "bg-chart-3", text: "text-chart-3" },
-  tier2: { dot: "bg-primary", text: "text-primary" },
-  tier3: { dot: "bg-muted-foreground", text: "text-muted-foreground" },
+const tierColors: Record<string, { bg: string; text: string }> = {
+  tier1: { bg: "bg-destructive", text: "text-destructive-foreground" },
+  new_tier1: { bg: "bg-chart-3", text: "text-white" },
+  tier2: { bg: "bg-primary", text: "text-primary-foreground" },
+  tier3: { bg: "bg-muted-foreground", text: "text-white" },
 };
 
 export default function CitiesPage() {
@@ -95,27 +93,25 @@ export default function CitiesPage() {
           }
         />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              城市列表
-              {cities && cities.length > 0 && (
-                <span className="ml-2 text-sm font-normal text-muted-foreground">
-                  共 {cities.length} 个城市，
-                  {cities.filter((c) => c.enabled).length} 个已启用
-                </span>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="bg-card rounded-lg border shadow-soft">
+          <div className="flex items-center justify-between p-6 border-b border-border">
+            <h2 className="text-lg font-semibold">城市列表</h2>
+            {cities && cities.length > 0 && (
+              <span className="text-sm text-muted-foreground">
+                共 <span className="font-bold tabular-nums">{cities.length}</span> 个城市，
+                <span className="font-bold tabular-nums text-success">{cities.filter((c) => c.enabled).length}</span> 个已启用
+              </span>
+            )}
+          </div>
+          <div className="p-6">
             {isLoading ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className="flex items-center gap-4 py-3">
                     <Skeleton className="h-4 w-8" />
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-4 w-16" />
-                    <Skeleton className="h-4 w-12" />
+                    <Skeleton className="h-6 w-16" />
                     <Skeleton className="h-6 w-10 ml-auto" />
                   </div>
                 ))}
@@ -123,37 +119,35 @@ export default function CitiesPage() {
             ) : cities && cities.length > 0 ? (
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[50px]">ID</TableHead>
-                    <TableHead>城市名称</TableHead>
-                    <TableHead>省份</TableHead>
-                    <TableHead>城市级别</TableHead>
-                    <TableHead>状态</TableHead>
-                    <TableHead className="text-right">操作</TableHead>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="w-[60px] text-xs font-medium text-muted-foreground">ID</TableHead>
+                    <TableHead className="text-xs font-medium text-muted-foreground">城市名称</TableHead>
+                    <TableHead className="text-xs font-medium text-muted-foreground">省份</TableHead>
+                    <TableHead className="text-xs font-medium text-muted-foreground">城市级别</TableHead>
+                    <TableHead className="text-xs font-medium text-muted-foreground">状态</TableHead>
+                    <TableHead className="text-right text-xs font-medium text-muted-foreground">操作</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {cities.map((city) => {
                     const tierConfig = tierColors[city.tier] || tierColors.tier3;
                     return (
-                      <TableRow key={city.id}>
-                        <TableCell className="text-muted-foreground">
+                      <TableRow key={city.id} className="hover:bg-muted/50">
+                        <TableCell className="text-muted-foreground tabular-nums">
                           {city.id}
                         </TableCell>
                         <TableCell className="font-medium">{city.name}</TableCell>
                         <TableCell>{city.province}</TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            <div
-                              className={cn(
-                                "w-2 h-2 rounded-full",
-                                tierConfig.dot
-                              )}
-                            />
-                            <span className={tierConfig.text}>
-                              {tierLabels[city.tier] || city.tier}
-                            </span>
-                          </div>
+                          <span
+                            className={cn(
+                              "inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-md",
+                              tierConfig.bg,
+                              tierConfig.text
+                            )}
+                          >
+                            {tierLabels[city.tier] || city.tier}
+                          </span>
                         </TableCell>
                         <TableCell>
                           <Switch
@@ -195,8 +189,8 @@ export default function CitiesPage() {
                 }}
               />
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       <CityFormDialog

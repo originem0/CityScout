@@ -13,6 +13,7 @@ from app.api.v1.export import router as export_router
 from app.api.v1.dashboard import router as dashboard_router
 from app.api.v1.settings import router as settings_router
 from app.api.v1.logs import router as logs_router
+from app.api.v1.ws import router as ws_router
 
 router = APIRouter()
 
@@ -29,3 +30,4 @@ router.include_router(export_router)
 router.include_router(dashboard_router)
 router.include_router(settings_router)
 router.include_router(logs_router)
+router.include_router(ws_router)

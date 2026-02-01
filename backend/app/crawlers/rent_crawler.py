@@ -1,5 +1,7 @@
 """58同城租房爬虫实现."""
+import hashlib
 import logging
+import os
 import re
 from datetime import datetime
 from decimal import Decimal
@@ -7,38 +9,16 @@ from typing import Callable, Awaitable
 from uuid import UUID
 
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.config import settings
 from app.crawlers.base import BaseCrawler
+from app.crawlers.constants import CITY_CODES_58
 from app.models import Rent, City
 
 logger = logging.getLogger(__name__)
-
-# 58同城城市代码映射（与 job_crawler 共用）
-CITY_CODES = {
-    "深圳": "sz",
-    "广州": "gz",
-    "杭州": "hz",
-    "成都": "cd",
-    "武汉": "wh",
-    "南京": "nj",
-    "长沙": "cs",
-    "苏州": "su",
-    "厦门": "xm",
-    "福州": "fz",
-    "珠海": "zh",
-    "东莞": "dg",
-    "佛山": "fs",
-    "昆明": "km",
-    "南宁": "nn",
-    "贵阳": "gy",
-    "海口": "hk",
-    "三亚": "sanya",
-    "无锡": "wx",
-    "宁波": "nb",
-}
 
 
 class RentCrawler(BaseCrawler):
@@ -47,7 +27,6 @@ class RentCrawler(BaseCrawler):
     def __init__(self, config: dict):
         super().__init__(config)
         self.db_session_factory = None
-        self.rents_collected = []
 
     async def _init_db(self):
         """Initialize database connection."""
@@ -66,7 +45,7 @@ class RentCrawler(BaseCrawler):
         if not city:
             return None
 
-        city_code = CITY_CODES.get(city.name)
+        city_code = CITY_CODES_58.get(city.name)
         if not city_code:
             logger.warning(f"No 58.com city code mapping for: {city.name}")
             return None
@@ -104,7 +83,7 @@ class RentCrawler(BaseCrawler):
         self,
         on_progress: Callable[[int, int], Awaitable[None]] | None = None,
     ) -> dict:
-        """Crawl 58同城 rental listings.
+        """Crawl 58同城 rental listings with pagination support.
 
         Args:
             on_progress: Callback for progress updates (progress%, record_count)
@@ -114,6 +93,9 @@ class RentCrawler(BaseCrawler):
         """
         await self._init_db()
 
+        # 从配置读取最大页数，默认5页
+        max_pages = self.config.get("max_pages", 5)
+
         async with self.db_session_factory() as db:
             # Get city info
             city_info = await self._get_city_info(db)
@@ -121,7 +103,7 @@ class RentCrawler(BaseCrawler):
                 raise ValueError(f"City not found or not supported: {self.city_id}")
 
             city_name, city_code = city_info
-            logger.info(f"Starting rent crawl for {city_name} (code: {city_code})")
+            logger.info(f"Starting rent crawl for {city_name} (code: {city_code}), max_pages={max_pages}")
 
             # Build URL for rental listings
             # 58同城租房页面: https://{city_code}.58.com/chuzu/
@@ -129,7 +111,7 @@ class RentCrawler(BaseCrawler):
 
             logger.info(f"Crawling URL: {url}")
 
-            # Navigate to page
+            # Navigate to first page
             success = await self.goto_with_retry(url)
             if not success:
                 raise Exception(f"Failed to load page: {url}")
@@ -137,17 +119,65 @@ class RentCrawler(BaseCrawler):
             # Wait for rental listings to load
             await self.wait_for_selector_safe(".house-list li, .list-item", timeout=15000)
 
-            # Scroll to load more content
-            await self.scroll_page(scroll_count=3)
+            # Try to detect total pages
+            total_pages = await self.get_total_pages()
+            if total_pages:
+                total_pages = min(total_pages, max_pages)
+                logger.info(f"Detected {total_pages} pages (limited to {max_pages})")
+            else:
+                total_pages = max_pages
+                logger.info(f"Could not detect total pages, using max_pages={max_pages}")
 
-            # Parse rental listings
-            rents_data = await self._parse_rent_list()
+            all_rents_data = []
+            current_page = 1
+
+            while current_page <= total_pages:
+                logger.info(f"Parsing page {current_page}/{total_pages}")
+
+                # Scroll to load more content
+                await self.scroll_page(scroll_count=3)
+
+                # Parse rental listings from current page
+                page_rents = await self._parse_rent_list()
+                all_rents_data.extend(page_rents)
+
+                # Report progress
+                if on_progress:
+                    progress_pct = int((current_page / total_pages) * 80)
+                    await on_progress(progress_pct, len(all_rents_data))
+
+                # Check if we should continue to next page
+                if current_page >= total_pages:
+                    break
+
+                # 58同城分页 selectors
+                next_selectors = [
+                    "a.next",
+                    ".pager a.next",
+                    "a[class*='next']",
+                    "a:has-text('下一页')",
+                ]
+
+                # Try to navigate to next page
+                has_next = await self.click_next_page(next_selectors)
+                if not has_next:
+                    logger.info(f"No more pages after page {current_page}")
+                    break
+
+                # Wait for new content to load
+                await self.wait_for_selector_safe(".house-list li, .list-item", timeout=15000)
+
+                # Random delay between pages (3-5 seconds for anti-detection)
+                await self.wait_random(3.0, 5.0)
+                current_page += 1
+
+            logger.info(f"Total rents collected from {current_page} pages: {len(all_rents_data)}")
 
             if on_progress:
-                await on_progress(50, len(rents_data))
+                await on_progress(90, len(all_rents_data))
 
             # Save to database
-            saved_count = await self._save_rents(db, rents_data, city_name)
+            saved_count = await self._save_rents(db, all_rents_data, city_name)
 
             if on_progress:
                 await on_progress(100, saved_count)
@@ -155,7 +185,8 @@ class RentCrawler(BaseCrawler):
             return {
                 "records_count": saved_count,
                 "city": city_name,
-                "total_found": len(rents_data),
+                "total_found": len(all_rents_data),
+                "pages_crawled": current_page,
             }
 
     async def _parse_rent_list(self) -> list[dict]:
@@ -179,8 +210,12 @@ class RentCrawler(BaseCrawler):
 
         if not items:
             logger.warning("No rental listings found on page")
-            # Take a screenshot for debugging
-            await self.page.screenshot(path="debug_rent_page.png")
+            # Take a screenshot for debugging with unique path
+            task_id = self.config.get("task_id", "unknown")
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            screenshot_dir = "logs/screenshots"
+            os.makedirs(screenshot_dir, exist_ok=True)
+            await self.page.screenshot(path=f"{screenshot_dir}/rent_{task_id}_{timestamp}.png")
             return rents
 
         for item in items:
@@ -221,7 +256,8 @@ class RentCrawler(BaseCrawler):
                     source_id = match.group(1)
 
             if not source_id:
-                source_id = f"58rent_{hash(title)}"
+                # 使用 hashlib.md5 生成稳定的 source_id（hash() 跨进程不稳定）
+                source_id = f"58rent_{hashlib.md5(title.encode()).hexdigest()[:16]}"
 
             # Extract price
             price_el = await item.query_selector(
@@ -330,30 +366,48 @@ class RentCrawler(BaseCrawler):
     async def _save_rents(
         self, db: AsyncSession, rents_data: list[dict], city_name: str
     ) -> int:
-        """Save rental listings to database."""
+        """Save rental listings to database with upsert (deduplication)."""
         saved_count = 0
 
         for rent_data in rents_data:
             try:
-                rent = Rent(
-                    data_source_id=self.data_source_id,
-                    city_id=self.city_id,
-                    crawl_task_id=UUID(self.config.get("task_id")) if self.config.get("task_id") else None,
-                    source_id=rent_data["source_id"],
-                    source_url=rent_data.get("source_url"),
-                    title=rent_data["title"],
-                    property_type=rent_data.get("property_type"),
-                    district=rent_data.get("district"),
-                    neighborhood=rent_data.get("neighborhood"),
-                    price=rent_data.get("price"),
-                    price_raw=rent_data.get("price_raw"),
-                    area=rent_data.get("area"),
-                    area_raw=rent_data.get("area_raw"),
-                    layout=rent_data.get("layout"),
-                    subway_info=rent_data.get("subway_info"),
-                    facilities=rent_data.get("facilities"),
+                values = {
+                    "data_source_id": self.data_source_id,
+                    "city_id": self.city_id,
+                    "crawl_task_id": UUID(self.config.get("task_id")) if self.config.get("task_id") else None,
+                    "source_id": rent_data["source_id"],
+                    "source_url": rent_data.get("source_url"),
+                    "title": rent_data["title"],
+                    "property_type": rent_data.get("property_type"),
+                    "district": rent_data.get("district"),
+                    "neighborhood": rent_data.get("neighborhood"),
+                    "price": rent_data.get("price"),
+                    "price_raw": rent_data.get("price_raw"),
+                    "area": rent_data.get("area"),
+                    "layout": rent_data.get("layout"),
+                    "subway_info": rent_data.get("subway_info"),
+                    "facilities": rent_data.get("facilities"),
+                }
+
+                # 使用 PostgreSQL upsert: 如果 source_id 已存在则更新
+                stmt = insert(Rent).values(**values)
+                stmt = stmt.on_conflict_do_update(
+                    index_elements=["source_id"],
+                    set_={
+                        "title": stmt.excluded.title,
+                        "property_type": stmt.excluded.property_type,
+                        "district": stmt.excluded.district,
+                        "neighborhood": stmt.excluded.neighborhood,
+                        "price": stmt.excluded.price,
+                        "price_raw": stmt.excluded.price_raw,
+                        "area": stmt.excluded.area,
+                        "layout": stmt.excluded.layout,
+                        "subway_info": stmt.excluded.subway_info,
+                        "facilities": stmt.excluded.facilities,
+                        "crawl_task_id": stmt.excluded.crawl_task_id,
+                    },
                 )
-                db.add(rent)
+                await db.execute(stmt)
                 saved_count += 1
 
             except Exception as e:

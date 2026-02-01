@@ -37,7 +37,7 @@ const columns: ColumnDef<JobListItem>[] = [
     cell: ({ row }) => (
       <div className="max-w-[200px]">
         <div className="font-medium truncate">{row.getValue("title")}</div>
-        <div className="text-xs text-slate-500">{row.original.company}</div>
+        <div className="text-xs text-muted-foreground">{row.original.company}</div>
       </div>
     ),
   },
@@ -90,7 +90,7 @@ const columns: ColumnDef<JobListItem>[] = [
     accessorKey: "data_source_name",
     header: "来源",
     cell: ({ row }) => (
-      <Badge variant="outline" className="bg-blue-50">
+      <Badge variant="outline" className="bg-accent">
         {row.getValue("data_source_name") || "-"}
       </Badge>
     ),

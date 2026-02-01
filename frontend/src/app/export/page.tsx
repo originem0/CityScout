@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { PageHeader } from "@/components/common/page-header";
 import {
   Select,
@@ -55,40 +54,44 @@ export default function ExportPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Excel Export */}
-          <Card className="transition-shadow hover:shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileSpreadsheet className="h-5 w-5 text-success" />
-                城市对比表（CSV）
-              </CardTitle>
-              <CardDescription>
+          <div className="bg-card rounded-lg border shadow-soft card-hover">
+            <div className="p-6 border-b border-border">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="bg-success rounded-md p-1.5">
+                  <FileSpreadsheet className="h-4 w-4 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold">城市对比表（CSV）</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
                 导出所有城市的薪资、租金、论坛数据对比表，可用 Excel 打开
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+              </p>
+            </div>
+            <div className="p-6">
               <Button
                 onClick={() => window.open(api.export.cityComparisonCsvUrl(), "_blank")}
               >
                 <FileDown className="h-4 w-4 mr-2" />
                 下载 CSV
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Markdown Export */}
-          <Card className="transition-shadow hover:shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-chart-4" />
-                论坛评论汇总（Markdown）
-              </CardTitle>
-              <CardDescription>
+          <div className="bg-card rounded-lg border shadow-soft card-hover">
+            <div className="p-6 border-b border-border">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="bg-chart-4 rounded-md p-1.5">
+                  <FileText className="h-4 w-4 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold">论坛评论汇总（Markdown）</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
                 按热度排序导出论坛帖子摘要
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              </p>
+            </div>
+            <div className="p-6 space-y-4">
               <div className="space-y-2">
-                <Label>选择城市</Label>
+                <Label className="text-xs font-medium">选择城市</Label>
                 <Select value={forumCityId} onValueChange={setForumCityId}>
                   <SelectTrigger>
                     <SelectValue placeholder="全部城市" />
@@ -116,22 +119,24 @@ export default function ExportPage() {
                 <FileDown className="h-4 w-4 mr-2" />
                 下载 Markdown
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* AI Report */}
-        <Card className="transition-shadow hover:shadow-md">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bot className="h-5 w-5 text-primary" />
-              AI 分析报告
-            </CardTitle>
-            <CardDescription>
+        <div className="bg-card rounded-lg border shadow-soft">
+          <div className="p-6 border-b border-border">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="bg-primary rounded-md p-1.5">
+                <Bot className="h-4 w-4 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold">AI 分析报告</h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
               基于采集数据生成分析提示词，可用于 ChatGPT / Claude 等 AI 工具进行深度分析
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+            </p>
+          </div>
+          <div className="p-6 space-y-4">
             <Button
               onClick={() => aiReportMutation.mutate()}
               disabled={aiReportMutation.isPending}
@@ -147,7 +152,7 @@ export default function ExportPage() {
             {aiPrompt && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label>生成的提示词</Label>
+                  <Label className="text-xs font-medium">生成的提示词</Label>
                   <Button variant="outline" size="sm" onClick={handleCopyPrompt}>
                     <Copy className="h-4 w-4 mr-2" />
                     复制
@@ -156,12 +161,12 @@ export default function ExportPage() {
                 <Textarea
                   value={aiPrompt}
                   readOnly
-                  className="font-mono h-96"
+                  className="font-mono h-96 bg-muted rounded-lg"
                 />
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </AppLayout>
   );

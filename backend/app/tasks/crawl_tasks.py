@@ -62,6 +62,12 @@ async def _run_crawl(
         elif task_type == "public_data":
             from app.crawlers.public_data_crawler import PublicDataCrawler
             crawler = PublicDataCrawler(config)
+        elif task_type == "company_review":
+            from app.crawlers.kanzhun_crawler import KanzhunCrawler
+            crawler = KanzhunCrawler(config)
+        elif task_type == "salary_stats":
+            from app.crawlers.zhiyouji_crawler import ZhiyoujiCrawler
+            crawler = ZhiyoujiCrawler(config)
         else:
             raise ValueError(f"Unknown task type: {task_type}")
 
